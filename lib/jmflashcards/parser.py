@@ -215,7 +215,7 @@ class Repository(object):
     def __getitem__(self, reference):
         for dirpath, dirnames, filenames in self.walk_flashcards():
             if reference == dirpath:
-                return self.flashcard_class.build(reference, self.directory)
+                return self.flashcard_class(reference, self.directory)
         raise KeyError(reference)
 
     def __iter__(self):
