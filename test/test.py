@@ -1,4 +1,4 @@
-import os
+import os, sys
 from unittest import TestCase
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -59,7 +59,8 @@ class RendererTestCase(TestCase):
 class FlashCardTestCase(TestCase):
 
     def setUp(self):
-        self.flashcard = FlashCard(FLASHCARD_PATH)
+        self.flashcard = FlashCard('test', FLASHCARD_PATH)
+        self.flashcard.parse()
 
     def test_one(self):
         self.assertEqual(len(self.flashcard.entries), NUM_ENTRIES)
@@ -100,32 +101,30 @@ class TextParseTestCase(TestCase):
         self.assert_text_parsing("\\~text", "~text")
         self.assert_text_parsing("\\\\text", "\\text")
 
-from jmflashcards.fcdeluxe import FCDELUXE_DIR_NAME, get_media_dir_name, \
-        FCDELUXE_HEADER
+from jmflashcards.fcdeluxe import FCDELUXE_DIR_NAME, FCDFlashCard, \
+        FCDFlashCardRenderer, FCDRepository, FCDELUXE_HEADER
 
 class FlashCardsDeluxeTestCase(TestCase):
-    def setUp(self):
-        self.flashcard = FlashCard(FLASHCARD_PATH)
-        self.dropbox_dir = mkdtemp(prefix="mockdropbox_dir")
-        try:
-            self.fcd_flashcard = FCDFlashCard(self.flashcard, 
-                dropbox_dir_path=self.dropbox_dir)
-            self.fcd_flashcard.build()
-        except:
-            self.fail("Failed to build flashcard")
-
-        self.file_name = self.flashcard.name + ".txt"
-        self.file_path = os.path.join(self.dropbox_dir, FCDELUXE_DIR_NAME, 
-                self.file_name)
-        self.media_dir_path = os.path.join(self.dropbox_dir, FCDELUXE_DIR_NAME, 
-                get_media_dir_name(self.flashcard.name))
 
     def test_build(self):
-        self.assertTrue(os.path.exists(self.file_path))
-        self.assertTrue(os.path.isfile(self.file_path))
-        self.assertTrue(os.path.exists(self.media_dir_path))
-        self.assertTrue(os.path.isdir(self.media_dir_path))
-        text = open(self.file_path).read()
+        flashcard = FlashCard('test', FLASHCARD_PATH)
+        flashcard.parse()
+        dropbox_dir = mkdtemp(prefix="mockdropbox_dir")
+        fcd_repository = FCDRepository(dropbox_dir)
+        renderer = FCDFlashCardRenderer(fcd_repository)
+        fcd_flashcard = renderer.render(flashcard)
+
+        file_name = flashcard.reference + ".txt"
+        file_path = os.path.join(dropbox_dir, FCDELUXE_DIR_NAME, file_name)
+        media_dir_path = os.path.join(dropbox_dir, FCDELUXE_DIR_NAME, 
+                FCDFlashCard.get_media_dir_name(flashcard.reference))
+
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(media_dir_path))
+        self.assertTrue(os.path.isdir(media_dir_path))
+
+        text = open(file_path).read()
 
         def fail_msg(msg, text=text):
             line = "."*70
@@ -144,14 +143,12 @@ class FlashCardsDeluxeTestCase(TestCase):
                     fail_msg("Invalid entry fields count", text=repr(line)))
             for f_field in fields[2:]:
                 if f_field:
-                    file_path = os.path.join(self.media_dir_path, f_field)
+                    file_path = os.path.join(media_dir_path, f_field)
                     self.assertTrue(os.path.exists(file_path), 
                             fail_msg("File '%s' dont exist" % file_path))
         self.assertEqual(line_counter, 4)
 
-
-    def tearDown(self):
-        rmtree(self.dropbox_dir)
+        rmtree(dropbox_dir)
 
 
 

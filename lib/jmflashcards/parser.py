@@ -20,12 +20,12 @@ class FlashCard(object):
     flashcard_file_name = FLASHCARD_FILE_NAME
     entry_class = None
 
-    def __init__(self, reference, flashcards_directory):
+    def __init__(self, reference, directory):
         # TODO Work with relative directories
+        self.directory = directory
         self.reference = reference
-        self.directory = os.path.join(flashcards_directory, reference)
-        self.name = os.path.basename(self.directory)
-        self.definition_path = os.path.join(self.directory, self.flashcard_file_name)
+        self.definition_path = os.path.join(directory, 
+                                            self.flashcard_file_name)  
         self.entries = []
         self.parsed = False
 
@@ -212,10 +212,10 @@ class Repository(object):
         for f in self.iter_flashcards():
             f.parse()
 
-    def __getitem__(self, name):
+    def __getitem__(self, reference):
         for dirpath, dirnames, filenames in self.walk_flashcards():
             if name == dirpath:
-                return FlashCard(dirpath, flashcards_directory=self.directory)
+                return self.flashcard_class.build(reference, self.directory)
         raise KeyError(name)
 
     def __iter__(self):

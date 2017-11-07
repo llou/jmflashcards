@@ -10,6 +10,7 @@ from jmflashcards.util import mkdir_p, walkdirs
 from jmflashcards.latex import render_latex_to_file
 
 FCDELUXE_HEADER = "Text 1\tText 2\tPicture 1\tPicture 2\tSound 1\tSound 2\n"
+FCDELUXE_DIR_NAME = "Flashcards Deluxe"
 
 class FCDFlashCard(object):
     header = FCDELUXE_HEADER
@@ -182,7 +183,7 @@ FCDFlashCardRenderer.renderer_assignement = [ (TextSide, TextSideRenderer),
                                       ]
 
 class FCDRepository(object):
-    dir_name = "Flashcards Deluxe"
+    dir_name = FCDELUXE_DIR_NAME 
     flashcard_class = FCDFlashCard
     renderer_class = FCDFlashCardRenderer
 
