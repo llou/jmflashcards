@@ -11,7 +11,7 @@ from jmflashcards.parser import FlashCard, Entry, Side, MathSide, ImageSide, \
 from jmflashcards.fcdeluxe import FCDFlashCard
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-FLASHCARD_DIR = "flashcard"
+FLASHCARD_DIR = "flashcards"
 FLASHCARD_PATH = os.path.join(CURRENT_DIR, FLASHCARD_DIR)
 NUM_ENTRIES = 4
 

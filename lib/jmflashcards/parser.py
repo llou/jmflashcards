@@ -24,7 +24,7 @@ class FlashCard(object):
         # TODO Work with relative directories
         self.directory = directory
         self.reference = reference
-        self.definition_path = os.path.join(directory, 
+        self.definition_path = os.path.join(directory, reference, 
                                             self.flashcard_file_name)  
         self.entries = []
         self.parsed = False
