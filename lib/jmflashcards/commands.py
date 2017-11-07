@@ -5,7 +5,7 @@ from jmflashcards import __version__
 
 USAGE = "%prog [options] <flashcard dir>"
 LOGGING_FORMAT = "[%(levelname)s] %(message)s"
-FLASHCARDS_DIR = "/var/share/flashcards"
+FLASHCARDS_DIR = "~/flashcards"
 DROPBOX_DIR = "~/Dropbox"
 
 def get_logging_level(verbosity):
