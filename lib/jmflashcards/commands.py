@@ -1,12 +1,15 @@
 import os
 from argparse import ArgumentParser
 import coloredlogs
+import yaml
 from jmflashcards import __version__
 
 USAGE = "%prog [options] <flashcard dir>"
 LOGGING_FORMAT = "[%(levelname)s] %(message)s"
 FLASHCARDS_DIR = "~/Dropbox/flashcards"
 OUTPUT_DIR = "~/Dropbox"
+CONFIG_FILE_PATH = '~/.config/jmflashcards/config.yaml'
+CONFIG_FILE_OPTIONS = ['input_dir', 'output_dir']
 
 def get_logging_level(verbosity):
     if verbosity == 1:
@@ -22,7 +25,30 @@ def init_logging(verbosity):
     coloredlogs.install(fmt=LOGGING_FORMAT, 
             level=get_logging_level(verbosity))
 
-def get_argument_parser():
+def load_config():
+    try:
+        with file(CONFIG_FILE_PATH, 'r') as f:
+            txt = f.read()
+            try:
+                data = yaml.load(txt)
+            except yaml.yamlError, exc:
+                if hasattr(exc, 'problem_mark'):
+                    mark = exc.problem_mark
+                    print "Config error in position (%s:%s)" % (mark.line+1,
+                            mark.column+1)
+                else:
+                    print "Config error"
+                exit(1)
+    except:
+        return {}
+
+    result = {}
+    for key in CONFIG_FILE_OPTIONS:
+        if key in data:
+            result[key] = data[key]
+    return result
+
+def get_argument_parser(config):
     parser = ArgumentParser(version=__version__)
     parser.add_argument("-f", "--flashcards-dir",  
             dest="flashcards_dir", default=FLASHCARDS_DIR, 
