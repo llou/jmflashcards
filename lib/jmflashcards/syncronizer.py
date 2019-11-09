@@ -7,11 +7,11 @@ class Syncronizer(object):
     fcd_repository_class = FCDRepository
     repository_class = Repository
 
-    def __init__(self, dropbox_dir,  directory, empty=True):
-        self.dropbox_dir = dropbox_dir
+    def __init__(self, output_dir,  directory, empty=True):
+        self.output_dir = output_dir
         self.directory = directory
         self.repository = self.repository_class(directory)
-        self.fcd_repository = self.fcd_repository_class(dropbox_dir)
+        self.fcd_repository = self.fcd_repository_class(output_dir)
         self.empty = empty
 
     def get_flashcards_status(self):

@@ -6,7 +6,7 @@ from jmflashcards import __version__
 USAGE = "%prog [options] <flashcard dir>"
 LOGGING_FORMAT = "[%(levelname)s] %(message)s"
 FLASHCARDS_DIR = "~/Dropbox/flashcards"
-DROPBOX_DIR = "~/Dropbox"
+OUTPUT_DIR = "~/Dropbox"
 
 def get_logging_level(verbosity):
     if verbosity == 1:
@@ -27,9 +27,9 @@ def get_argument_parser():
     parser.add_argument("-f", "--flashcards-dir",  
             dest="flashcards_dir", default=FLASHCARDS_DIR, 
             help="where to find flashcards")
-    parser.add_argument("-d", "--dropbox-dir",  
-             dest="dropbox_dir", default=DROPBOX_DIR, 
-            help="path to the dropbox directory")
+    parser.add_argument("-d", "--output-dir",  
+             dest="output_dir", default=OUTPUT_DIR, 
+            help="path to the output directory")
     parser.add_argument("-V" , action="count", dest="verbosity", default=0,
             help="sets verbosity level")
     parser.add_argument("-e" , dest="empty", default=False, action="store_true",
@@ -45,8 +45,8 @@ def initialize():
 def run_syncronize():
     from jmflashcards.syncronizer import Syncronizer
     args = initialize()
-    dropbox_dir = os.path.expanduser(args.dropbox_dir)
+    output_dir = os.path.expanduser(args.output_dir)
     flashcards_dir = os.path.expanduser(args.flashcards_dir)
-    syncronizer = Syncronizer(dropbox_dir, flashcards_dir, empty=args.empty)
+    syncronizer = Syncronizer(output_dir, flashcards_dir, empty=args.empty)
     syncronizer.sync()
 

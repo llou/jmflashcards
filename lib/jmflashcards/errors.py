@@ -41,7 +41,8 @@ class JMFCParsingEntriesError(JMFCEParsingError):
             return "\n".join(format_exception(e_type, e_value, traceback))
 
     def __str__(self):
-        header = "Error parsing flashcard '%s' entries:" % self.flashcard.reference
+        reference = self.flashcard.reference
+        header = "Error parsing flashcard '%s' entries:" % reference
         error_msgs = [ self._format_exception(*e) for e in self.errors ]
         error_msgs.insert(0, header)
         return self.divider_line.join(error_msgs)

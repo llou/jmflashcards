@@ -24,7 +24,8 @@ class FCDFlashCard(object):
         self.reference = reference
         self.repository = repository
         self.file_name = os.path.basename(self.reference) + self.file_extension
-        self.path = os.path.join(self.repository.directory, self.reference + self.file_extension)
+        self.path = os.path.join(self.repository.directory, self.reference + 
+                self.file_extension)
         self.media_path = os.path.join(self.repository.directory, 
                 FCDFlashCard.get_media_dir_name(self.reference))
 
@@ -193,9 +194,9 @@ class FCDRepository(object):
         self.renderer = self.renderer_class(self)
 
         if not os.path.exists(self.dropbox_dir):
-            raise JMFCError("Dropbox directory dont exist")
+            raise JMFCError("Output directory dont exist")
         if not os.path.isdir(self.dropbox_dir):
-            raise JMFCError("Dropbox path is not a directory")
+            raise JMFCError("Output path is not a directory")
         if not os.path.exists(self.directory):
             try:
                 os.mkdir(self.directory)
