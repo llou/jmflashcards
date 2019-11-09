@@ -6,10 +6,9 @@ from jmflashcards import __version__
 
 USAGE = "%prog [options] <flashcard dir>"
 LOGGING_FORMAT = "[%(levelname)s] %(message)s"
-FLASHCARDS_DIR = "~/Dropbox/flashcards"
+INPUT_DIR = "~/Dropbox/flashcards"
 OUTPUT_DIR = "~/Dropbox"
 CONFIG_FILE_PATH = '~/.config/jmflashcards/config.yaml'
-CONFIG_FILE_OPTIONS = ['input_dir', 'output_dir']
 
 def get_logging_level(verbosity):
     if verbosity == 1:
@@ -40,21 +39,20 @@ def load_config():
                     print "Config error"
                 exit(1)
     except:
-        return {}
+        data = {}
 
     result = {}
-    for key in CONFIG_FILE_OPTIONS:
-        if key in data:
-            result[key] = data[key]
+    result['input_dir'] = data.get('input_dir', INPUT_DIR)
+    result['output_dir'] = data.get('output_dir', OUTPUT_DIR)
     return result
 
 def get_argument_parser(config):
     parser = ArgumentParser(version=__version__)
-    parser.add_argument("-f", "--flashcards-dir",  
-            dest="flashcards_dir", default=FLASHCARDS_DIR, 
-            help="where to find flashcards")
-    parser.add_argument("-d", "--output-dir",  
-             dest="output_dir", default=OUTPUT_DIR, 
+    parser.add_argument("-i", "--input-dir",  
+            dest="input_dir", default=config['input_dir'], 
+            help="where to find flashcards definitions")
+    parser.add_argument("-o", "--output-dir",  
+             dest="output_dir", default=config['output_dir'], 
             help="path to the output directory")
     parser.add_argument("-V" , action="count", dest="verbosity", default=0,
             help="sets verbosity level")
