@@ -7,10 +7,13 @@ class Syncronizer(object):
     fcd_repository_class = FCDRepository
     repository_class = Repository
 
-    def __init__(self, output_dir,  directory, empty=True):
+    def __init__(self, output_dir,  directory, question_keys, answer_keys,
+            empty=True):
         self.output_dir = output_dir
         self.directory = directory
-        self.repository = self.repository_class(directory)
+        self.question_keys = question_keys
+        self.answer_keys = answer_keys
+        self.repository = self.repository_class(directory, self)
         self.fcd_repository = self.fcd_repository_class(output_dir)
         self.empty = empty
 

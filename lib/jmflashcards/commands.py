@@ -9,6 +9,8 @@ LOGGING_FORMAT = "[%(levelname)s] %(message)s"
 INPUT_DIR = "~/Dropbox/flashcards"
 OUTPUT_DIR = "~/Dropbox"
 CONFIG_FILE_PATH = '~/.config/jmflashcards/config.yaml'
+QUESTION_KEYS = ("question","pregunta")
+RESPONSE_KEYS = ("response","respuesta")
 
 def get_logging_level(verbosity):
     if verbosity == 1:
@@ -44,6 +46,8 @@ def load_config():
     result = {}
     result['input_dir'] = data.get('input_dir', INPUT_DIR)
     result['output_dir'] = data.get('output_dir', OUTPUT_DIR)
+    result['question_key'] = data.get('question_keys', QUESTION_KEYS)
+    result['response_key'] = data.get('response_keys', RESPONSE_KEYS)
     return result
 
 def get_argument_parser(config):
@@ -58,10 +62,15 @@ def get_argument_parser(config):
             help="sets verbosity level")
     parser.add_argument("-e" , dest="empty", default=False, action="store_true",
             help="doesnt apply actions")
+    parser.add_argument("-q" , "--question_key", action="append",
+            dest="question_keys", help="add key for questions")
+    parser.add_argument("-a" , "--answer_key", action="append",
+            dest="answer_keys", help="add key for answer")
     return parser
 
 def initialize():
-    parser = get_argument_parser()
+    config = load_config()
+    parser = get_argument_parser(config)
     args = parser.parse_args()
     init_logging(args.verbosity)
     return args
@@ -70,7 +79,6 @@ def run_syncronize():
     from jmflashcards.syncronizer import Syncronizer
     args = initialize()
     output_dir = os.path.expanduser(args.output_dir)
-    flashcards_dir = os.path.expanduser(args.flashcards_dir)
+    flashcards_dir = os.path.expanduser(args.infput_dir)
     syncronizer = Syncronizer(output_dir, flashcards_dir, empty=args.empty)
-    syncronizer.sync()
-
+    syncronizer.sync() 

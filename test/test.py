@@ -1,4 +1,4 @@
-import os, sys
+import os
 from unittest import TestCase
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -59,7 +59,14 @@ class RendererTestCase(TestCase):
 class FlashCardTestCase(TestCase):
 
     def setUp(self):
-        self.flashcard = FlashCard('test', FLASHCARD_PATH)
+        self.syncronizer = Mock()
+        self.syncronizer.question_keys = ('question',)
+        self.syncronizer.answer_keys = ('answer',)
+        self.repository = Mock()
+        self.repository.syncronizer = self.syncronizer
+        self.repository.directory = FLASHCARD_PATH
+
+        self.flashcard = FlashCard('test', self.repository)
         self.flashcard.parse()
 
     def test_one(self):
@@ -101,22 +108,29 @@ class TextParseTestCase(TestCase):
         self.assert_text_parsing("\\~text", "~text")
         self.assert_text_parsing("\\\\text", "\\text")
 
-from jmflashcards.fcdeluxe import FCDELUXE_DIR_NAME, FCDFlashCard, \
+from jmflashcards.fcdeluxe import FCDELUXE_DIR_NAME, \
         FCDFlashCardRenderer, FCDRepository, FCDELUXE_HEADER
 
 class FlashCardsDeluxeTestCase(TestCase):
+    def setUp(self):
+        self.syncronizer = Mock()
+        self.repository = Mock()
+        self.repository.syncronizer = self.syncronizer
+        self.repository.directory = FLASHCARD_PATH
+        self.syncronizer.question_keys = ('question',)
+        self.syncronizer.answer_keys = ('answer',)
 
     def test_build(self):
-        flashcard = FlashCard('test', FLASHCARD_PATH)
+        flashcard = FlashCard('test', self.repository)
         flashcard.parse()
-        dropbox_dir = mkdtemp(prefix="mockdropbox_dir")
-        fcd_repository = FCDRepository(dropbox_dir)
+        output_dir = mkdtemp(prefix="mockoutput_dir")
+        fcd_repository = FCDRepository(output_dir)
         renderer = FCDFlashCardRenderer(fcd_repository)
         fcd_flashcard = renderer.render(flashcard)
 
         file_name = flashcard.reference + ".txt"
-        file_path = os.path.join(dropbox_dir, FCDELUXE_DIR_NAME, file_name)
-        media_dir_path = os.path.join(dropbox_dir, FCDELUXE_DIR_NAME, 
+        file_path = os.path.join(output_dir, FCDELUXE_DIR_NAME, file_name)
+        media_dir_path = os.path.join(output_dir, FCDELUXE_DIR_NAME, 
                 FCDFlashCard.get_media_dir_name(flashcard.reference))
 
         self.assertTrue(os.path.exists(file_path))
@@ -148,7 +162,7 @@ class FlashCardsDeluxeTestCase(TestCase):
                             fail_msg("File '%s' dont exist" % file_path))
         self.assertEqual(line_counter, 4)
 
-        rmtree(dropbox_dir)
+        rmtree(output_dir)
 
 
 

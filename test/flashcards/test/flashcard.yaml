@@ -1,10 +1,10 @@
 ---
 
-- pregunta: uno
-  respuesta: $E=mc^2
-- pregunta: dos
-  respuesta: Si
-- pregunta: tres
-  respuesta: ño
-- pregunta: cuatro
-  respuesta: puede
+- question: uno
+  answer: $E=mc^2
+- question: dos
+  answer: Si
+- question: tres
+  answer: ño
+- question: cuatro
+  answer: puede

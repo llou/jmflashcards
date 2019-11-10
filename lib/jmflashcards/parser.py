@@ -11,20 +11,18 @@ MATH_SECTION_SYMBOL = "$"
 IMAGE_SECTION_SYMBOL = "~"
 ESCAPE_SYMBOL = "\\"
 
-QUESTION_SIDE = "question"
-ANSWER_SIDE = "answer"
-
 FLASHCARD_FILE_NAME = "flashcard.yaml"
 
 class FlashCard(object):
     flashcard_file_name = FLASHCARD_FILE_NAME
     entry_class = None
 
-    def __init__(self, reference, directory):
+    def __init__(self, reference, repository):
         # TODO Work with relative directories
-        self.directory = directory
+        self.repository = repository
+        self.directory = repository.directory
         self.reference = reference
-        self.definition_path = os.path.join(directory, reference, 
+        self.definition_path = os.path.join(repository.directory, reference, 
                                             self.flashcard_file_name)  
         self.entries = []
         self.parsed = False
@@ -63,8 +61,6 @@ class FlashCard(object):
 
 
 class Entry(object):
-    question_tokens = ('pregunta', 'question')
-    answer_tokens = ('respuesta', 'answer')
     boolean_yes = "si"
     boolean_no = "no"
 
@@ -75,6 +71,10 @@ class Entry(object):
         self.index = index
         self.flashcard = flashcard
         self.reference = flashcard.reference
+        self.repository = flashcard.repository
+        self.syncronizer = self.repository.syncronizer
+        self.question_keys = self.syncronizer.question_keys
+        self.answer_keys = self.syncronizer.answer_keys
         self.raw_entry = raw_entry
         if not isinstance(raw_entry, dict):
             raise JMFCEntryError(self, "Raw entry must be a dictionary")
@@ -100,13 +100,13 @@ class Entry(object):
 
     def _parse_raw_entry(self, raw_entry):
         for key in raw_entry:
-            if key.lower() in self.question_tokens:
+            if key.lower() in self.question_keys:
                 raw_question = self._parse_raw_side(raw_entry[key])
                 break
         else:
             raise JMFCEntryError(self, "Entry dont have a valid question")
         for key in raw_entry:
-            if key.lower() in self.answer_tokens:
+            if key.lower() in self.answer_keys:
                 raw_answer = self._parse_raw_side(raw_entry[key])
                 break
         else:
@@ -183,9 +183,10 @@ class Repository(object):
     flashcard_class = FlashCard
     flashcard_file_name = FLASHCARD_FILE_NAME
 
-    def __init__(self, directory):
+    def __init__(self, directory, syncronizer):
         logging.debug("Initializing flashcard repository on: %s" % directory)
         self.directory = directory
+        self.syncronizer = syncronizer
 
     def walk_flashcards(self):
         for dirpath, dirnames, filenames in walkdirs(self.directory):
@@ -215,7 +216,7 @@ class Repository(object):
     def __getitem__(self, reference):
         for dirpath, dirnames, filenames in self.walk_flashcards():
             if reference == dirpath:
-                return self.flashcard_class(reference, self.directory)
+                return self.flashcard_class(reference, self.repository)
         raise KeyError(reference)
 
     def __iter__(self):
