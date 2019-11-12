@@ -63,9 +63,11 @@ def get_argument_parser(config):
     parser.add_argument("-e" , dest="empty", default=False, action="store_true",
             help="doesnt apply actions")
     parser.add_argument("-q" , "--question_key", action="append",
-            dest="question_keys", help="add key for questions")
+            dest="question_keys", help="add key for questions",
+            default=config['question_keys'])
     parser.add_argument("-a" , "--answer_key", action="append",
-            dest="answer_keys", help="add key for answer")
+            dest="answer_keys", help="add key for answer",
+            default=config['response_keys'])
     return parser
 
 def initialize():
@@ -79,6 +81,9 @@ def run_syncronize():
     from jmflashcards.syncronizer import Syncronizer
     args = initialize()
     output_dir = os.path.expanduser(args.output_dir)
-    flashcards_dir = os.path.expanduser(args.infput_dir)
-    syncronizer = Syncronizer(output_dir, flashcards_dir, empty=args.empty)
+    directory = os.path.expanduser(args.input_dir)
+    question_keys = args.question_keys
+    answer_keys = args.answer_keys
+    syncronizer = Syncronizer(output_dir, directory, question_keys, 
+            answer_keys, empty=args.empty)
     syncronizer.sync() 
