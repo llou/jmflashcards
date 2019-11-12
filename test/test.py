@@ -2,7 +2,8 @@ import os
 from unittest import TestCase
 from tempfile import mkdtemp
 from shutil import rmtree
-from mock import Mock
+from mock import Mock, patch, mock_open
+from jmflashcards.commands import load_config
 from jmflashcards.runner import run_command
 from jmflashcards.latex import RenderLatexTemplate, RenderLatexToDVI, \
         RenderDVIToPNG, render_latex_to_file
@@ -17,6 +18,52 @@ NUM_ENTRIES = 4
 
 def test_run_command():
     run_command("ls", cwd="/tmp")
+
+# TODO Configure the load config procedure
+CONFIG_FILE_WORKIN ="""
+input_dir: /dev/null
+output_dir: /dev/urandom
+question_keys: 
+    - one
+    - two
+response_keys:
+    - three
+    - four
+"""
+
+class ConfigurationTestCase(TestCase):
+
+    def test_defaultconfig(self):
+        from jmflashcards.commands import INPUT_DIR, OUTPUT_DIR, \
+                QUESTION_KEYS,RESPONSE_KEYS
+        with patch('jmflashcards.commands.open',
+                mock_open(read_data="")): 
+            result = load_config()
+            self.assertIn("input_dir", result)
+            self.assertEqual(result['input_dir'], INPUT_DIR)
+            self.assertIn("output_dir", result)
+            self.assertEqual(result['output_dir'], OUTPUT_DIR)
+            self.assertIn("question_keys", result)
+            for key in QUESTION_KEYS:
+               self.assertIn(key, result['question_keys'])
+            self.assertIn("response_keys", result)
+            for key in RESPONSE_KEYS:
+               self.assertIn(key, result['response_keys'])
+
+    def test_custom_config(self):
+        with patch('jmflashcards.commands.open', 
+                mock_open(read_data=CONFIG_FILE_WORKIN)): 
+            result = load_config()
+            self.assertIn("input_dir", result)
+            self.assertEqual(result['input_dir'], "/dev/null")
+            self.assertIn("output_dir", result)
+            self.assertEqual(result['output_dir'], "/dev/urandom")
+            self.assertIn("question_keys", result)
+            for key in ('one', 'two'):
+               self.assertIn(key, result['question_keys'])
+            self.assertIn("response_keys", result)
+            for key in ('three', 'four'):
+               self.assertIn(key, result['response_keys'])
 
 class RendererTestCase(TestCase):
     equation = "E=mc^2"

@@ -28,7 +28,7 @@ def init_logging(verbosity):
 
 def load_config():
     try:
-        with file(CONFIG_FILE_PATH, 'r') as f:
+        with open(CONFIG_FILE_PATH, 'r') as f:
             txt = f.read()
             try:
                 data = yaml.load(txt)
@@ -40,14 +40,14 @@ def load_config():
                 else:
                     print "Config error"
                 exit(1)
+            data = {} if data is None else data
     except:
         data = {}
-
     result = {}
     result['input_dir'] = data.get('input_dir', INPUT_DIR)
     result['output_dir'] = data.get('output_dir', OUTPUT_DIR)
-    result['question_key'] = data.get('question_keys', QUESTION_KEYS)
-    result['response_key'] = data.get('response_keys', RESPONSE_KEYS)
+    result['question_keys'] = data.get('question_keys', QUESTION_KEYS)
+    result['response_keys'] = data.get('response_keys', RESPONSE_KEYS)
     return result
 
 def get_argument_parser(config):
