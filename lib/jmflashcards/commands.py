@@ -10,7 +10,7 @@ INPUT_DIR = "~/Dropbox/flashcards"
 OUTPUT_DIR = "~/Dropbox"
 CONFIG_FILE_PATH = '~/.config/jmflashcards/config.yaml'
 QUESTION_KEYS = ("question","pregunta")
-RESPONSE_KEYS = ("response","respuesta")
+ANSWER_KEYS = ("answer","respuesta")
 
 def get_logging_level(verbosity):
     if verbosity == 1:
@@ -47,7 +47,7 @@ def load_config():
     result['input_dir'] = data.get('input_dir', INPUT_DIR)
     result['output_dir'] = data.get('output_dir', OUTPUT_DIR)
     result['question_keys'] = data.get('question_keys', QUESTION_KEYS)
-    result['response_keys'] = data.get('response_keys', RESPONSE_KEYS)
+    result['answer_keys'] = data.get('answer_keys', ANSWER_KEYS)
     return result
 
 def get_argument_parser(config):
@@ -67,7 +67,7 @@ def get_argument_parser(config):
             default=config['question_keys'])
     parser.add_argument("-a" , "--answer_key", action="append",
             dest="answer_keys", help="add key for answer",
-            default=config['response_keys'])
+            default=config['answer_keys'])
     return parser
 
 def initialize():

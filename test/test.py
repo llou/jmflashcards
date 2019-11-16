@@ -20,13 +20,13 @@ def test_run_command():
     run_command("ls", cwd="/tmp")
 
 # TODO Configure the load config procedure
-CONFIG_FILE_WORKIN ="""
+CONFIG_FILE_WORKING ="""
 input_dir: /dev/null
 output_dir: /dev/urandom
 question_keys: 
     - one
     - two
-response_keys:
+answer_keys:
     - three
     - four
 """
@@ -35,7 +35,7 @@ class ConfigurationTestCase(TestCase):
 
     def test_defaultconfig(self):
         from jmflashcards.commands import INPUT_DIR, OUTPUT_DIR, \
-                QUESTION_KEYS,RESPONSE_KEYS
+                QUESTION_KEYS, ANSWER_KEYS
         with patch('jmflashcards.commands.open',
                 mock_open(read_data="")): 
             result = load_config()
@@ -46,13 +46,13 @@ class ConfigurationTestCase(TestCase):
             self.assertIn("question_keys", result)
             for key in QUESTION_KEYS:
                self.assertIn(key, result['question_keys'])
-            self.assertIn("response_keys", result)
-            for key in RESPONSE_KEYS:
-               self.assertIn(key, result['response_keys'])
+            self.assertIn("answer_keys", result)
+            for key in ANSWER_KEYS:
+               self.assertIn(key, result['answer_keys'])
 
     def test_custom_config(self):
         with patch('jmflashcards.commands.open', 
-                mock_open(read_data=CONFIG_FILE_WORKIN)): 
+                mock_open(read_data=CONFIG_FILE_WORKING)): 
             result = load_config()
             self.assertIn("input_dir", result)
             self.assertEqual(result['input_dir'], "/dev/null")
@@ -61,9 +61,9 @@ class ConfigurationTestCase(TestCase):
             self.assertIn("question_keys", result)
             for key in ('one', 'two'):
                self.assertIn(key, result['question_keys'])
-            self.assertIn("response_keys", result)
+            self.assertIn("answer_keys", result)
             for key in ('three', 'four'):
-               self.assertIn(key, result['response_keys'])
+               self.assertIn(key, result['answer_keys'])
 
 class RendererTestCase(TestCase):
     equation = "E=mc^2"
@@ -210,6 +210,4 @@ class FlashCardsDeluxeTestCase(TestCase):
         self.assertEqual(line_counter, 4)
 
         rmtree(output_dir)
-
-
 
