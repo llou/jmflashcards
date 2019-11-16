@@ -44,26 +44,30 @@ changed with a configuration file stored in the users
 languajes, the location of the *input* and *output* directories can be set from
 there too.
 
+.. TODO Explain the options
+
 
 Creating the repository
 -----------------------
-The repository is a tree of directories having the root in the *input*
+The repository is a *tree* of directories having the root in the *input*
 directory. Each *leaf* directory defines a flashcard with its name and it must
 contain at least one file called ``flashcards.yaml`` where the cards are
-defined. There can be  other files with images that can be referenced in the
-definition file.
+defined. There can be  other files with images and sounds that can be
+referenced in the definition file.
 
 File syntax
 -----------
-The syntax of the file is simple, a list of pairs ``question:`` and
-``answer:`` pairs. 
+The syntax of the file is simple, a list of ``question:`` and ``answer:``
+pairs. 
 
 If you start writting text after the colon it is a text entry that can be
-formated using the *Flashcards deluxe* syntax. The text can be extended to
+formated using the `Flashcards deluxe syntax`_. The text can be extended to
 mutiple lines using the _YaML syntax.
 
-If you want to include an image you have to put the ``~`` after de colon
-followed with the name of the ``image file`` file stored within the definition
+.. _`Flashcards deluxe syntax`: http://orangeorapple.com/Flashcards/
+
+If you want to include an image or sound you have to put the ``~`` after de
+colon followed with the name of the image file stored within the definition
 directory.
 
 If you want to include a mathematical expression start with a ``$`` simbol and
@@ -73,7 +77,7 @@ then the expression using te `latex syntax`_.
 
 Syncronization
 --------------
-The app is ran with the command ``jlflashcards`` and crawls the definition tree
+The app is ran with the command ``jmflashcards`` and crawls the definition tree
 processing each one of the files, to see if it has to *render* the card it
 compares the timestamps of the original card and the renderd one and if the
 first is newer it overwrites the old one.
