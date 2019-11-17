@@ -6,8 +6,10 @@ jmflashcards
 -----------------------------------
 A Flashcards Deluxe cards processor
 -----------------------------------
+
+
 `Flashcards Deluxe`_ is an app for Android_ and iOs_ devices that helps in the
-memorization process using a well known technique called flash cards. It is a
+memorization process using a well known technique called *flash cards*. It is a
 very nice app with a lot of features that enrich the studying process. 
 
 .. _`Flashcards Deluxe`: http://orangeorapple.com/Flashcards/
@@ -27,6 +29,16 @@ the answer.
 
 .. TODO Example of card, mirar la forma de insertar codigo
 
+.. code:: yaml
+
+  - question: How you set up a function in javascript to be run after certain
+              time?
+    answer: With <i>setTimeout(function, time)</i>
+  - question: How you set up a function in javascript that runs in periods
+              of time?
+    answer: With <i>setInterval(function, time)</i>
+    
+
 The program works syncronizing two directories, one with the cards source and
 another one inside a cloud storage system directory called *Flashcards deluxe*
 where the cards definition are stored ready to be picked from the app.
@@ -42,9 +54,19 @@ The key words used in the definition files for *question* and *answer* can be
 changed with a configuration file stored in the users
 ``~/.config/jmflashcards/config.yaml`` directory, so it can be used in multiple
 languajes, the location of the *input* and *output* directories can be set from
-there too.
+there too. The file is in *YaML* *key-value* format and the entries accepted
+are:
 
-.. TODO Explain the options
+* **input_dir**: root of the cards tree.
+
+* **outpu_dir**: directory where the cards are placed to be picked by the
+  mobile app.
+
+* **question_keys**: This is a YaML list of valid keys to be used to identify
+  the front side of the card.
+
+* **answer_keys**: This is a YaML list of valid keys to be used to identify
+  the back side of the card.
 
 
 Creating the repository
@@ -55,23 +77,24 @@ contain at least one file called ``flashcards.yaml`` where the cards are
 defined. There can be  other files with images and sounds that can be
 referenced in the definition file.
 
-File syntax
+Card syntax
 -----------
 The syntax of the file is simple, a list of ``question:`` and ``answer:``
-pairs. 
+pairs or whatever you have chosen to name the cards. Then 
 
-If you start writting text after the colon it is a text entry that can be
-formated using the `Flashcards deluxe syntax`_. The text can be extended to
-mutiple lines using the _YaML syntax.
+* If you start writting text after the colon it is a text entry that can be
+  formated using the `Flashcards deluxe syntax`_. The text can be extended to
+  mutiple lines using the _YaML syntax.
 
 .. _`Flashcards deluxe syntax`: http://orangeorapple.com/Flashcards/
+.. _YaML: https://en.wikipedia.org/wiki/YAML
 
-If you want to include an image or sound you have to put the ``~`` after de
-colon followed with the name of the image file stored within the definition
-directory.
+* If you want to include an image or sound you have to put the ``~`` after de
+  colon followed with the name of the image file stored within the definition
+  directory.
 
-If you want to include a mathematical expression start with a ``$`` simbol and
-then the expression using te `latex syntax`_.
+* If you want to include a mathematical expression start with a ``$`` simbol and
+  then the expression using te `latex syntax`_.
 
 .. _`latex syntax`: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 
