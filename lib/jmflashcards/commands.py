@@ -32,7 +32,7 @@ def load_config():
             txt = f.read()
             try:
                 data = yaml.load(txt, Loader=yaml.Loader)
-            except yaml.yamlError, exc:
+            except yaml.yamlError as exc:
                 if hasattr(exc, 'problem_mark'):
                     mark = exc.problem_mark
                     print("Config error in position (%s:%s)" % (mark.line+1,

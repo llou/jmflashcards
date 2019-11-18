@@ -1,14 +1,17 @@
-from subprocess import Popen, PIPE
+import asyncio
+from asyncio.subprocess import PIPE
 import shlex
 
-from errors import JMFCCommandError
+from .errors import JMFCCommandError
 
-def _run_command(args, cwd=None):
+async def _run_command(args, cwd=None):
     args = shlex.split(args)
-    p = Popen(args, stdout=PIPE, stderr=PIPE, cwd=cwd)
-    rc = p.wait()
-    stdout = p.stdout.read()
-    stderr = p.stdout.read()
+    p = await asyncio.create_subprocess_exec(args, stdout=PIPE, stderr=PIPE,
+            cwd=cwd)
+    stdout, stderr = await p.communicate()
+    rc = p.returncode
+    stdout = stdout.decode()
+    stderr = stderr.decode()
     return rc, stdout, stderr
 
 def run_command(args, cwd=None):

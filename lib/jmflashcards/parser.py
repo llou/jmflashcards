@@ -85,7 +85,7 @@ class Entry(object):
         self.answer = self._get_side(self.raw_answer, "answer")
 
     def _parse_raw_side(self, raw_side):
-        if not isinstance(raw_side, basestring):
+        if not isinstance(raw_side, str):
             if isinstance(raw_side, bool):
                 raw_side = self.boolean_yes if raw_side else self.boolean_no
             elif raw_side is None:

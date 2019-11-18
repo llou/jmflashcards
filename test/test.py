@@ -6,7 +6,7 @@ sys.path.insert(0, "./lib/")
 from unittest import TestCase
 from tempfile import mkdtemp
 from shutil import rmtree
-from mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch, mock_open
 from jmflashcards.commands import load_config
 from jmflashcards.runner import run_command
 from jmflashcards.latex import RenderLatexTemplate, RenderLatexToDVI, \

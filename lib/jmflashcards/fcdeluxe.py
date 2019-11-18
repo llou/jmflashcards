@@ -154,7 +154,7 @@ class FileRenderer(SideRenderer):
 
     def tuple_builder(self, value):
         v, n = value, self.returns_index
-        return tuple([ value if i == n else "" for i in xrange(0, 3) ])
+        return tuple([ value if i == n else "" for i in range(0, 3) ])
 
     def render(self):
         value = self._build()
