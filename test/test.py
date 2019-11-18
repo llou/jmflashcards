@@ -1,4 +1,8 @@
 import os
+import sys
+
+sys.path.insert(0, "../lib/")
+
 from unittest import TestCase
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -32,7 +36,6 @@ answer_keys:
 """
 
 class ConfigurationTestCase(TestCase):
-
     def test_defaultconfig(self):
         from jmflashcards.commands import INPUT_DIR, OUTPUT_DIR, \
                 QUESTION_KEYS, ANSWER_KEYS
@@ -208,6 +211,9 @@ class FlashCardsDeluxeTestCase(TestCase):
                     self.assertTrue(os.path.exists(file_path), 
                             fail_msg("File '%s' dont exist" % file_path))
         self.assertEqual(line_counter, 4)
-
         rmtree(output_dir)
+
+if __name__ == "__main__":
+    import unittest
+    unittest.main()
 
