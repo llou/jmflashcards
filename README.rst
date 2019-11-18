@@ -7,6 +7,7 @@ jmflashcards
 A Flashcards Deluxe cards processor
 -----------------------------------
 
+.. image:: https://travis-ci.com/llou/jmflashcards.svg?branch=master
 
 `Flashcards Deluxe`_ is an app for Android_ and iOs_ devices that helps in the
 memorization process using a well known technique called *flash cards*. It is a
