@@ -84,10 +84,9 @@ pairs or whatever you have chosen to name the cards. Then
 
 * If you start writting text after the colon it is a text entry that can be
   formated using the `Flashcards deluxe syntax`_. The text can be extended to
-  mutiple lines using the _YaML syntax.
+  mutiple lines using the YaML_ syntax.
 
 .. _`Flashcards deluxe syntax`: http://orangeorapple.com/Flashcards/
-.. _YaML: https://en.wikipedia.org/wiki/YAML
 
 * If you want to include an image or sound you have to put the ``~`` after de
   colon followed with the name of the image file stored within the definition
