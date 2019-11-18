@@ -44,10 +44,16 @@ The program works syncronizing two directories, one with the cards source and
 another one inside a cloud storage system directory called *Flashcards deluxe*
 where the cards definition are stored ready to be picked from the app.
 
+Requirements
+------------
+This program runs on Python 2.7 and has been tested in Linux and Mac OS, the
+python dependencies are listed in the ``requirements.txt``. It requires of a
+Latex compatible TeX distribution to build the mathematical expressions.
+
 Installation
 ------------
 The program can be installed in \*nix systems running the ``setup.py install``
-command as root. It's depedencies are listed in the ``requirements.txt`` file.
+command as root. 
 
 Configuring the app
 -------------------
