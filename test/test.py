@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.insert(0, "../lib/")
+sys.path.insert(0, "./lib/")
 
 from unittest import TestCase
 from tempfile import mkdtemp
