@@ -31,7 +31,7 @@ class FlashCard(object):
         logging.info("Parsing flashcard: %s" % self.reference)
         try:
             with codecs.open(self.definition_path, "r", "utf-8") as f:
-                self.raw_entries = yaml.load(f)
+                self.raw_entries = yaml.load(f, Loader=yaml.Loader)
         except IOError:
             raise JMFCError("Unable to read flashcard file: %s" % self.definition_path)
         except yaml.YAMLError as e:

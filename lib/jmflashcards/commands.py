@@ -31,14 +31,14 @@ def load_config():
         with open(CONFIG_FILE_PATH, 'r') as f:
             txt = f.read()
             try:
-                data = yaml.load(txt)
+                data = yaml.load(txt, Loader=yaml.Loader)
             except yaml.yamlError, exc:
                 if hasattr(exc, 'problem_mark'):
                     mark = exc.problem_mark
-                    print "Config error in position (%s:%s)" % (mark.line+1,
-                            mark.column+1)
+                    print("Config error in position (%s:%s)" % (mark.line+1,
+                            mark.column+1))
                 else:
-                    print "Config error"
+                    print("Config error")
                 exit(1)
             data = {} if data is None else data
     except:
