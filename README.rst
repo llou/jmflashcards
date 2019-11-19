@@ -1,4 +1,4 @@
-.. image:: http://orangeorapple.com/Flashcards/images/WebIcon70.png 
+.. image:: https://user-images.githubusercontent.com/154958/69144373-74a79500-0acb-11ea-8036-eff42b84f7f8.png 
 
 ============
 jmflashcards
@@ -7,7 +7,6 @@ jmflashcards
 A Flashcards Deluxe cards processor
 -----------------------------------
 
-.. image:: https://travis-ci.com/llou/jmflashcards.svg?branch=master
 
 `Flashcards Deluxe`_ is an app for Android_ and iOs_ devices that helps in the
 memorization process using a well known technique called *flash cards*. It is a
