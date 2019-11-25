@@ -1,5 +1,9 @@
 .. image:: https://user-images.githubusercontent.com/154958/69144373-74a79500-0acb-11ea-8036-eff42b84f7f8.png 
 
+
+.. image:: https://travis-ci.org/llou/jmflashcards.svg?branch=master
+    :target: https://travis-ci.org/llou/jmflashcards
+
 ============
 jmflashcards
 ============
