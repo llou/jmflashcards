@@ -73,7 +73,6 @@ class FileRenderer(BaseRenderer):
         self.file_path = file_path
         self.dirname = os.path.dirname(file_path)
         self.basename = os.path.basename(file_path)
-        # XXX GOTCHA XXX
         name = os.path.splitext(self.basename)[0]
         super(FileRenderer, self).__init__(name=name, workdir=workdir)
 
