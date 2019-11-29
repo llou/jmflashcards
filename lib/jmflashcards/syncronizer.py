@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from jmflashcards.errors import JMFCError
 from jmflashcards.parser import Repository 
@@ -38,7 +39,7 @@ class Syncronizer(object):
             if fcd_flashcard.get_date() < flashcard.get_date():
                 yield ref
 
-    def sync(self):
+    async def sync(self):
         updated, new, to_delete = self.get_flashcards_status()
         if updated or new or to_delete:
             print "Starting syncronization"
@@ -46,7 +47,7 @@ class Syncronizer(object):
             if updated: print "Updating: %d" % len(updated)
             if to_delete: print "Removing: %d" % len(to_delete)
             for fc in updated + new:
-                self.render_flashcard(fc)
+                await self.render_flashcard(fc)
             for fc in to_delete:
                 self.delete_flashcard(fc)
         else:
@@ -55,14 +56,14 @@ class Syncronizer(object):
             print "Removing: %d" % len(to_delete)
             print "Nothing to be done" 
 
-    def render_flashcard(self, ref):
+    async def render_flashcard(self, ref):
         logging.info("Building flashcard '%s'" % ref)
         if self.empty:
             return
         flashcard = self.repository[ref]
         try:
             flashcard.parse()
-            self.fcd_repository.renderer.render(flashcard)
+            await self.fcd_repository.renderer.render(flashcard)
         except JMFCError as e:
             logging.error(str(e))
 

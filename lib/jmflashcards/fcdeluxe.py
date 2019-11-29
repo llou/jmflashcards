@@ -2,7 +2,7 @@ import os
 import codecs
 from traceback import format_exc
 import logging
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from shutil import copyfile, rmtree
 from jmflashcards.errors import JMFCError
 from jmflashcards.parser import TextSide, ImageSide, MathSide
@@ -43,7 +43,7 @@ class FCDFlashCardRenderer(object):
     def __init__(self, repository):
         self.repository = repository
 
-    def render(self, flashcard):
+    async def render(self, flashcard):
         reference = flashcard.reference
         logging.info("Begin rendering flashcard deluxe: %s" % reference)
         fcd_flashcard = FCDFlashCard(reference, self.repository)
@@ -74,14 +74,14 @@ class FCDFlashCardRenderer(object):
         with codecs.open(path, "w", "utf-8") as f:
             f.write(FCDELUXE_HEADER)
             for entry in flashcard.entries:
-                f.write(self.render_entry(entry, media_path))
+                await f.write(self.render_entry(entry, media_path))
         return fcd_flashcard
 
     @classmethod
-    def render_entry(cls, entry, media_path):
+    async def render_entry(cls, entry, media_path):
         logging.debug("Building entry: %d" % entry.index)
-        sq = cls.render_side(entry.question, media_path)
-        sa = cls.render_side(entry.answer, media_path)
+        sq = await cls.render_side(entry.question, media_path)
+        sa = await cls.render_side(entry.answer, media_path)
         res = []
         for q, a in zip(sq, sa):
             res.append(q)
@@ -139,8 +139,8 @@ class FileRenderer(SideRenderer):
     def _original_file_built(self):
         raise NotImplementedError()
 
-    def _build(self):
-        with self._original_file_built() as original_file:
+    async def _build(self):
+        async with self._original_file_built() as original_file:
             ext = os.path.splitext(original_file)[1]
             dest_file_name = self._get_dest_file_name(ext)
             dest_path = os.path.join(self.media_path, dest_file_name)
@@ -156,8 +156,8 @@ class FileRenderer(SideRenderer):
         v, n = value, self.returns_index
         return tuple([ value if i == n else "" for i in range(0, 3) ])
 
-    def render(self):
-        value = self._build()
+    async def render(self):
+        value = await self._build()
         return self.tuple_builder(value)
 
 
@@ -172,9 +172,9 @@ class ImageSideRenderer(FileRenderer):
 class MathSideRenderer(FileRenderer):
     returns_index = 1
 
-    @contextmanager
-    def _original_file_built(self):
-        with render_latex_to_file(self.side.get_cured_text()) as f:
+    @asynccontextmanager
+    async def _original_file_built(self):
+        async with render_latex_to_file(self.side.get_cured_text()) as f:
             yield f
 
 

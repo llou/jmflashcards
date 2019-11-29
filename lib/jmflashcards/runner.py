@@ -14,8 +14,8 @@ async def _run_command(args, cwd=None):
     stderr = stderr.decode()
     return rc, stdout, stderr
 
-def run_command(args, cwd=None):
-    rc, stdout, stderr = _run_command(args, cwd=cwd)
+async def run_command(args, cwd=None):
+    rc, stdout, stderr = await _run_command(args, cwd=cwd)
     if rc != 0:
         raise JMFCCommandError(args, cwd, rc, stdout, stderr)
 

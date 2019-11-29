@@ -1,5 +1,5 @@
 import os
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 import logging
 from jmflashcards.runner import run_command
 from jmflashcards.util import get_random_name
@@ -32,7 +32,7 @@ class BaseRenderer(object):
         self.workdir = workdir if not workdir is None else self.default_workdir
         self.name = name if not name is None else get_random_name()
 
-    def _build_file(self):
+    async def _build_file(self):
         pass
 
     def _get_build_file_path(self):
@@ -41,11 +41,11 @@ class BaseRenderer(object):
     def _iter_built_files_paths(self):
         yield self._get_build_file_path()
 
-    def __enter__(self):
-        self._build_file()
+    async def __aenter__(self):
+        await self._build_file()
         return self._get_build_file_path()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __aexit__(self, exc_type, exc_value, traceback):
         self._delete_building_files()
         # TODO reset valuest 
 
@@ -78,9 +78,9 @@ class FileRenderer(BaseRenderer):
         super(FileRenderer, self).__init__(name=name, workdir=workdir)
 
 class CommandFileRenderer(FileRenderer):
-    def _build_file(self):
+    async def _build_file(self):
         # TODO catch exceptions here
-        run_command(self._get_command(), cwd=self.workdir)
+        await run_command(self._get_command(), cwd=self.workdir)
 
     def _get_command(self):
         return "false" 
@@ -107,12 +107,11 @@ class RenderDVIToPNG(CommandFileRenderer):
         values = self._get_build_file_path(), self.file_path
         return self.command_template % values
 
-@contextmanager
-def render_latex_to_file(expression, workdir="/tmp"):
-
+@asynccontextmanager
+async def render_latex_to_file(expression, workdir="/tmp"):
     logging.info("Rendering latex expression: '%s'" % expression)
-    with RenderLatexTemplate(expression, workdir=workdir) as latex_path:
-        with RenderLatexToDVI(latex_path, workdir=workdir) as dvi_path:
-            with RenderDVIToPNG(dvi_path, workdir=workdir) as png_path:
+    async with RenderLatexTemplate(expression, workdir=workdir) as latex_path:
+        async with RenderLatexToDVI(latex_path, workdir=workdir) as dvi_path:
+            async with RenderDVIToPNG(dvi_path, workdir=workdir) as png_path:
                 logging.info("Rendering latex expression: '%s' to file: %s" % (expression, png_path))
                 yield png_path 

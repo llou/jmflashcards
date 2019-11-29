@@ -6,7 +6,7 @@ sys.path.insert(0, "./lib/")
 from unittest import TestCase
 from tempfile import mkdtemp
 from shutil import rmtree
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch, mock_open, call, AsyncMock
 from jmflashcards.commands import load_config
 from jmflashcards.runner import run_command
 from jmflashcards.latex import RenderLatexTemplate, RenderLatexToDVI, \
@@ -68,42 +68,53 @@ class ConfigurationTestCase(TestCase):
             for key in ('three', 'four'):
                self.assertIn(key, result['answer_keys'])
 
+@patch('jmflashcards.latex.run_command')
+@patch('jmflashcards.latex.get_random_name')
+@patch('jmflashcards.latex.open')
+@patch('os.remove')
 class RendererTestCase(TestCase):
     equation = "E=mc^2"
 
-    def assert_valid_file(self, path):
-        self.assertTrue(os.path.exists(path))
-        self.assertTrue(os.path.isfile(path))
+    async def test_tex_render(self, remove_mock, open_mock, 
+            get_random_name_mock, run_command_mock):
 
-    def assert_deleted_file(self, path):
-        self.assertFalse(os.path.exists(path))
+        get_random_name_mock.return_value = "fish"
+        async with RenderLatexTemplate(self.equation) as path:
+            self.assertEqual(path, "/tmp/fish.tex")
+            open_mock.assert_called_with("/tmp/fish.tex", "w")
+        remove_mock.assert_called_with("/tmp/fish.tex")
 
-    def test_tex_render(self):
-        with RenderLatexTemplate(self.equation) as path:
-            the_path = path
-            self.assert_valid_file(path)
-        self.assert_deleted_file(the_path)
+    async def test_dvi_render(self, remove_mock, open_mock, 
+            get_random_name_mock, run_command_mock):
+        get_random_name_mock.return_value = "fish"
+        async with RenderLatexTemplate(self.equation) as l_path:
+            async with RenderLatexToDVI(l_path) as d_path:
+                self.assertEqual(d_path, "/tmp/fish.dvi")
+                run_command_mock.assert_called_with("latex /tmp/fish.tex", cwd="/tmp")
+        remove_mock.assert_has_calls([call("/tmp/fish.log"), call("/tmp/fish.aux"),
+                call("/tmp/fish.dvi"), call("/tmp/fish.tex")])
+                
+    async def test_png_render(self, remove_mock, open_mock, 
+            get_random_name_mock, run_command_mock):
+        get_random_name_mock.return_value = "fish"
+        async with RenderLatexTemplate(self.equation) as l_path:
+            async with RenderLatexToDVI(l_path) as d_path:
+                async with RenderDVIToPNG(d_path) as p_path:
+                    self.assertEqual(p_path, "/tmp/fish.png")
+        run_command_mock.assert_called_with(RenderDVIToPNG.command_template % ("/tmp/fish.png", "/tmp/fish.dvi"), cwd="/tmp")
+        remove_mock.assert_has_calls([call("/tmp/fish.png"), 
+            call("/tmp/fish.log"), call("/tmp/fish.aux"),
+            call("/tmp/fish.dvi"), call("/tmp/fish.tex")])
 
-    def test_dvi_render(self):
-        with RenderLatexTemplate(self.equation) as l_path:
-            with RenderLatexToDVI(l_path) as d_path:
-                the_path = d_path
-                self.assert_valid_file(d_path)
-        self.assert_deleted_file(the_path)
-
-    def test_png_render(self):
-        with RenderLatexTemplate(self.equation) as l_path:
-            with RenderLatexToDVI(l_path) as d_path:
-                with RenderDVIToPNG(d_path) as p_path:
-                    the_path = p_path
-                    self.assert_valid_file(p_path)
-        self.assert_deleted_file(the_path)
-
-    def test_total_render(self):
-        with render_latex_to_file(self.equation) as path:
-                    the_path = path
-                    self.assert_valid_file(path)
-        self.assert_deleted_file(the_path)
+    async def test_total_render(self, remove_mock, open_mock, 
+            get_random_name_mock, run_command_mock):
+        get_random_name_mock.return_value = "fish"
+        async with render_latex_to_file(self.equation) as path:
+            self.assertEqual(path, "/tmp/fish.png")
+        run_command_mock.assert_called_with(RenderDVIToPNG.command_template % ("/tmp/fish.png", "/tmp/fish.dvi"), cwd="/tmp")
+        remove_mock.assert_has_calls([call("/tmp/fish.png"), 
+            call("/tmp/fish.log"), call("/tmp/fish.aux"),
+            call("/tmp/fish.dvi"), call("/tmp/fish.tex")])
 
 
 class FlashCardTestCase(TestCase):
@@ -170,13 +181,13 @@ class FlashCardsDeluxeTestCase(TestCase):
         self.syncronizer.question_keys = ('question',)
         self.syncronizer.answer_keys = ('answer',)
 
-    def test_build(self):
+    async def test_build(self):
         flashcard = FlashCard('test', self.repository)
         flashcard.parse()
         output_dir = mkdtemp(prefix="mockoutput_dir")
         fcd_repository = FCDRepository(output_dir)
         renderer = FCDFlashCardRenderer(fcd_repository)
-        fcd_flashcard = renderer.render(flashcard)
+        fcd_flashcard = await renderer.render(flashcard)
 
         file_name = flashcard.reference + ".txt"
         file_path = os.path.join(output_dir, FCDELUXE_DIR_NAME, file_name)
