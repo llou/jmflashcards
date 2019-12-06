@@ -1,13 +1,16 @@
 import os
 import codecs
 from traceback import format_exc
+from shutil import copyfile
+from functools import reduce
+import asyncio
 import logging
 from contextlib import asynccontextmanager, contextmanager
 from shutil import copyfile, rmtree
 from jmflashcards.errors import JMFCError
 from jmflashcards.parser import TextSide, ImageSide, MathSide
-from jmflashcards.util import mkdir_p, walkdirs
 from jmflashcards.latex import render_latex_to_file
+from jmflashcards.util import mkdir_p, walkdirs
 
 FCDELUXE_HEADER = "Text 1\tText 2\tPicture 1\tPicture 2\tSound 1\tSound 2\n"
 FCDELUXE_DIR_NAME = "Flashcards Deluxe"
@@ -70,38 +73,35 @@ class FCDFlashCardRenderer(object):
             raise JMFCError(msg)
 
         # Render entries
+
         logging.debug("Creating flashcard deluxe file: %s" % path)
-        with codecs.open(path, "w", "utf-8") as f:
-            f.write(FCDELUXE_HEADER)
-            for entry in flashcard.entries:
-                await f.write(self.render_entry(entry, media_path))
+        lines = []
+        for entry in flashcard.entries:
+            lines.append(await self.render_entry(entry, media_path))
+        f = codecs.open(path, "w", "utf-8")
+        f.write(FCDELUXE_HEADER)
+        f.writelines(lines)
+        f.close()
         return fcd_flashcard
 
-    @classmethod
-    async def render_entry(cls, entry, media_path):
+    async def render_entry(self, entry, media_path):
         logging.debug("Building entry: %d" % entry.index)
-        sq = await cls.render_side(entry.question, media_path)
-        sa = await cls.render_side(entry.answer, media_path)
-        res = []
-        for q, a in zip(sq, sa):
-            res.append(q)
-            res.append(a)
+        sqrenderer = self.get_side_renderer(entry.question, media_path)
+        await sqrenderer.render()
+        rq = sqrenderer.get_text_tuple()
+        sarenderer = self.get_side_renderer(entry.answer, media_path)
+        await sqrenderer.render()
+        ra = sqrenderer.get_text_tuple()
+        res = reduce(lambda x,y: x + list(y), zip(rq, ra), [])
         return "\t".join(res) + "\n"
 
-    @classmethod
-    def render_side(cls, side, media_path):
-        renderer = cls.get_side_renderer(side)
-        return renderer(side, media_path).render()
+    def get_side_renderer(self, side, media_path):
+        "Given the side object selects the matching renderer object"
 
-    @classmethod
-    def get_side_renderer(cls, side):
-        for sc, rc in cls.renderer_assignement:
+        for sc, rc in self.renderer_assignement:
             if issubclass(side.__class__, sc):
                 logging.debug("Selecting '%s'" % rc.__name__) 
-                return rc
-        else:
-            raise JMFCError("Unknown side type '%s'" % side.__class__.__name__)
-
+                return rc(side, media_path)
 
 class SideRenderer(object):
     file_name_template = "entry_%{entry_index}d_%{section_type}s"
@@ -111,77 +111,61 @@ class SideRenderer(object):
         self.side = side
         self.entry = side.entry
         self.flashcard = side.flashcard
-        self.name = side.name
         self.media_path = media_path
+        self.cured_text = side.get_cured_text()
 
-    def render(self):
+    async def render(self):
+        pass
+
+    def get_text_tuple(self):
         return "", "", ""
 
 
 class TextSideRenderer(SideRenderer):
-    def render(self):
-        return self.side.get_cured_text(), "", ""
+    def get_text_tuple(self):
+        return self.cured_text, "", ""
 
 
 class FileRenderer(SideRenderer):
     file_name_template = "entry_%(entry_index)d_%(section_side)s.%(extension)s"
-    returns_index = 0
 
-    def _get_dest_file_name(self, ext):
+    def __init__(self, *args):
+        super().__init__(*args)
         values = dict(
                 entry_index  = self.entry.index,
                 section_side = self.side.name,
-                extension = ext
+                extension = self.get_ext()
                 )
-        return self.file_name_template % values
+        self.dest_file_name = self.file_name_template % values
+        self.output_path = os.path.join(self.media_path, self.dest_file_name)
 
-    @contextmanager
-    def _original_file_built(self):
-        raise NotImplementedError()
-
-    async def _build(self):
-        async with self._original_file_built() as original_file:
-            ext = os.path.splitext(original_file)[1]
-            dest_file_name = self._get_dest_file_name(ext)
-            dest_path = os.path.join(self.media_path, dest_file_name)
-            logging.debug("Copying file: '%s' to '%s'" % (original_file, dest_path))
-            copyfile(original_file, dest_path)
-        return dest_file_name
-
-    def _get_section_base_path(self):
-        file_name = self._get_file_name()
-        return os.path.join(self.media_path, file_name)
-
-    def tuple_builder(self, value):
-        v, n = value, self.returns_index
-        return tuple([ value if i == n else "" for i in range(0, 3) ])
+    def get_ext(self):
+        return '.png'
 
     async def render(self):
-        value = await self._build()
-        return self.tuple_builder(value)
+        return self
+
+    def get_text_tuple(self):
+        return "", self.dest_file_name , ""
 
 
 class ImageSideRenderer(FileRenderer):
-    returns_index = 1
+    def get_ext(self):
+        return os.path.splitext(self.cured_text)
 
-    @contextmanager
-    def _original_file_built(self):
-        yield self.side.get_cured_text()
+    async def render(self):
+        copyfile(self.cured_text, self.output_path)
 
 
 class MathSideRenderer(FileRenderer):
-    returns_index = 1
-
-    @asynccontextmanager
-    async def _original_file_built(self):
-        async with render_latex_to_file(self.side.get_cured_text()) as f:
-            yield f
+    async def render(self):
+        await render_latex_to_file(self.cured_text, self.output_path)
 
 
-FCDFlashCardRenderer.renderer_assignement = [ (TextSide, TextSideRenderer),
-                                      (ImageSide, ImageSideRenderer),
-                                      (MathSide, MathSideRenderer)
-                                      ]
+FCDFlashCardRenderer.renderer_assignement=[(TextSide, TextSideRenderer),
+                                           (ImageSide, ImageSideRenderer),
+                                           (MathSide, MathSideRenderer)]
+
 
 class FCDRepository(object):
     dir_name = FCDELUXE_DIR_NAME 

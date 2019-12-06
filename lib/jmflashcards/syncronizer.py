@@ -39,22 +39,29 @@ class Syncronizer(object):
             if fcd_flashcard.get_date() < flashcard.get_date():
                 yield ref
 
-    async def sync(self):
+    def sync(self):
         updated, new, to_delete = self.get_flashcards_status()
-        if updated or new or to_delete:
-            print "Starting syncronization"
-            if new: print "New: %d" % len(new)
-            if updated: print "Updating: %d" % len(updated)
-            if to_delete: print "Removing: %d" % len(to_delete)
-            for fc in updated + new:
-                await self.render_flashcard(fc)
+        if updated or new:
+            print("Starting syncronization")
+            if new: print ("New: %d" % len(new))
+            if updated: print ("Updating: %d" % len(updated))
+            asyncio.run(self.sync2(new+updated))
+        elif to_delete:
+            print ("Removing: %d" % len(to_delete))
             for fc in to_delete:
                 self.delete_flashcard(fc)
         else:
-            print "New: %d" % len(new)
-            print "Updating: %d" % len(updated)
-            print "Removing: %d" % len(to_delete)
-            print "Nothing to be done" 
+            print("New: %d" % len(new))
+            print("Updating: %d" % len(updated))
+            print("Removing: %d" % len(to_delete))
+            print("Nothing to be done")
+
+    async def sync2(self, coroutines):
+        tasks = []
+        for fc in coroutines:
+            task = asyncio.create_task(self.render_flashcard(fc))
+            tasks.append(task)
+        await asyncio.gather(*tasks)
 
     async def render_flashcard(self, ref):
         logging.info("Building flashcard '%s'" % ref)
@@ -67,8 +74,7 @@ class Syncronizer(object):
         except JMFCError as e:
             logging.error(str(e))
 
-
-    def delete_flashcard(self, ref):
+    async def delete_flashcard(self, ref):
         logging.info("Removing flashcard '%s'" % ref)
         if not self.empty:
             fcd_flashcard = self.fcd_repository[ref]

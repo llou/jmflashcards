@@ -3,14 +3,13 @@ import sys
 
 sys.path.insert(0, "./lib/")
 
-from unittest import TestCase
+from unittest import TestCase, IsolatedAsyncioTestCase
 from tempfile import mkdtemp
 from shutil import rmtree
 from unittest.mock import Mock, patch, mock_open, call, AsyncMock
 from jmflashcards.commands import load_config
 from jmflashcards.runner import run_command
-from jmflashcards.latex import RenderLatexTemplate, RenderLatexToDVI, \
-        RenderDVIToPNG, render_latex_to_file
+from jmflashcards.latex import render_latex_to_file
 from jmflashcards.parser import FlashCard, Entry, Side, MathSide, ImageSide, \
         TextSide
 from jmflashcards.fcdeluxe import FCDFlashCard
@@ -18,7 +17,7 @@ from jmflashcards.fcdeluxe import FCDFlashCard
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FLASHCARD_DIR = "flashcards"
 FLASHCARD_PATH = os.path.join(CURRENT_DIR, FLASHCARD_DIR)
-NUM_ENTRIES = 4
+NUM_ENTRIES = 5
 
 def test_run_command():
     run_command("ls", cwd="/tmp")
@@ -67,54 +66,6 @@ class ConfigurationTestCase(TestCase):
             self.assertIn("answer_keys", result)
             for key in ('three', 'four'):
                self.assertIn(key, result['answer_keys'])
-
-@patch('jmflashcards.latex.run_command')
-@patch('jmflashcards.latex.get_random_name')
-@patch('jmflashcards.latex.open')
-@patch('os.remove')
-class RendererTestCase(TestCase):
-    equation = "E=mc^2"
-
-    async def test_tex_render(self, remove_mock, open_mock, 
-            get_random_name_mock, run_command_mock):
-
-        get_random_name_mock.return_value = "fish"
-        async with RenderLatexTemplate(self.equation) as path:
-            self.assertEqual(path, "/tmp/fish.tex")
-            open_mock.assert_called_with("/tmp/fish.tex", "w")
-        remove_mock.assert_called_with("/tmp/fish.tex")
-
-    async def test_dvi_render(self, remove_mock, open_mock, 
-            get_random_name_mock, run_command_mock):
-        get_random_name_mock.return_value = "fish"
-        async with RenderLatexTemplate(self.equation) as l_path:
-            async with RenderLatexToDVI(l_path) as d_path:
-                self.assertEqual(d_path, "/tmp/fish.dvi")
-                run_command_mock.assert_called_with("latex /tmp/fish.tex", cwd="/tmp")
-        remove_mock.assert_has_calls([call("/tmp/fish.log"), call("/tmp/fish.aux"),
-                call("/tmp/fish.dvi"), call("/tmp/fish.tex")])
-                
-    async def test_png_render(self, remove_mock, open_mock, 
-            get_random_name_mock, run_command_mock):
-        get_random_name_mock.return_value = "fish"
-        async with RenderLatexTemplate(self.equation) as l_path:
-            async with RenderLatexToDVI(l_path) as d_path:
-                async with RenderDVIToPNG(d_path) as p_path:
-                    self.assertEqual(p_path, "/tmp/fish.png")
-        run_command_mock.assert_called_with(RenderDVIToPNG.command_template % ("/tmp/fish.png", "/tmp/fish.dvi"), cwd="/tmp")
-        remove_mock.assert_has_calls([call("/tmp/fish.png"), 
-            call("/tmp/fish.log"), call("/tmp/fish.aux"),
-            call("/tmp/fish.dvi"), call("/tmp/fish.tex")])
-
-    async def test_total_render(self, remove_mock, open_mock, 
-            get_random_name_mock, run_command_mock):
-        get_random_name_mock.return_value = "fish"
-        async with render_latex_to_file(self.equation) as path:
-            self.assertEqual(path, "/tmp/fish.png")
-        run_command_mock.assert_called_with(RenderDVIToPNG.command_template % ("/tmp/fish.png", "/tmp/fish.dvi"), cwd="/tmp")
-        remove_mock.assert_has_calls([call("/tmp/fish.png"), 
-            call("/tmp/fish.log"), call("/tmp/fish.aux"),
-            call("/tmp/fish.dvi"), call("/tmp/fish.tex")])
 
 
 class FlashCardTestCase(TestCase):
@@ -172,7 +123,7 @@ class TextParseTestCase(TestCase):
 from jmflashcards.fcdeluxe import FCDELUXE_DIR_NAME, \
         FCDFlashCardRenderer, FCDRepository, FCDELUXE_HEADER
 
-class FlashCardsDeluxeTestCase(TestCase):
+class FlashCardsDeluxeTestCase(IsolatedAsyncioTestCase):
     def setUp(self):
         self.syncronizer = Mock()
         self.repository = Mock()
@@ -199,7 +150,9 @@ class FlashCardsDeluxeTestCase(TestCase):
         self.assertTrue(os.path.exists(media_dir_path))
         self.assertTrue(os.path.isdir(media_dir_path))
 
-        text = open(file_path).read()
+        f = open(file_path)
+        text = f.read()
+        f.close()
 
         def fail_msg(msg, text=text):
             line = "."*70
@@ -221,8 +174,22 @@ class FlashCardsDeluxeTestCase(TestCase):
                     file_path = os.path.join(media_dir_path, f_field)
                     self.assertTrue(os.path.exists(file_path), 
                             fail_msg("File '%s' dont exist" % file_path))
-        self.assertEqual(line_counter, 4)
+        self.assertEqual(line_counter, NUM_ENTRIES)
         rmtree(output_dir)
+
+from jmflashcards.latex import render_latex_to_file, WORK_DIR
+
+class LatexRendererTestCase(IsolatedAsyncioTestCase):
+    output_file = "/tmp/output.png"
+    tex_expression = "\\alpha"
+
+    async def test_run(self):
+        await render_latex_to_file(self.tex_expression, self.output_file)
+        self.assertTrue(os.path.exists(self.output_file))
+
+    def tearDown(self):
+        if os.path.exists(self.output_file):
+            os.remove(self.output_file)
 
 if __name__ == "__main__":
     import unittest

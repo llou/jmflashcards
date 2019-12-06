@@ -6,7 +6,9 @@ from .errors import JMFCCommandError
 
 async def _run_command(args, cwd=None):
     args = shlex.split(args)
-    p = await asyncio.create_subprocess_exec(args, stdout=PIPE, stderr=PIPE,
+    cmd = args[0]
+    args = args[1:]
+    p = await asyncio.create_subprocess_exec(cmd, *args, stdout=PIPE, stderr=PIPE,
             cwd=cwd)
     stdout, stderr = await p.communicate()
     rc = p.returncode

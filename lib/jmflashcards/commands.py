@@ -2,7 +2,6 @@ import os
 from argparse import ArgumentParser
 import coloredlogs
 import yaml
-from jmflashcards import __version__
 
 USAGE = "%prog [options] <flashcard dir>"
 LOGGING_FORMAT = "[%(levelname)s] %(message)s"
@@ -51,7 +50,7 @@ def load_config():
     return result
 
 def get_argument_parser(config):
-    parser = ArgumentParser(version=__version__)
+    parser = ArgumentParser()
     parser.add_argument("-i", "--input-dir",  
             dest="input_dir", default=config['input_dir'], 
             help="where to find flashcards definitions")
@@ -86,4 +85,4 @@ def run_syncronize():
     answer_keys = args.answer_keys
     syncronizer = Syncronizer(output_dir, directory, question_keys, 
             answer_keys, empty=args.empty)
-    syncronizer.sync() 
+    syncronizer.sync()
