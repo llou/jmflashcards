@@ -55,8 +55,8 @@ Latex compatible TeX distribution to build the mathematical expressions.
 
 Installation
 ------------
-The program can be installed in \*nix systems running the ``setup.py install``
-command as root. 
+The program can be installed in \*nix systems first installing dependencies
+with ``pip install -r requirements.txt`` then  the ``setup.py install``. 
 
 Configuring the app
 -------------------
