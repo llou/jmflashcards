@@ -1,8 +1,6 @@
 import os
 import sys
-
-sys.path.insert(0, "./lib/")
-
+import asyncio
 from unittest import TestCase, IsolatedAsyncioTestCase
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -20,7 +18,10 @@ FLASHCARD_PATH = os.path.join(CURRENT_DIR, FLASHCARD_DIR)
 NUM_ENTRIES = 5
 
 def test_run_command():
-    run_command("ls", cwd="/tmp")
+    async def test():
+        await run_command("ls", cwd="/tmp")
+    asyncio.run(test())
+
 
 # TODO Configure the load config procedure
 CONFIG_FILE_WORKING ="""
