@@ -1,4 +1,5 @@
 *.pyc
+.tox/
 build/
 dist/
 lib/jmflashcards.egg-info/
