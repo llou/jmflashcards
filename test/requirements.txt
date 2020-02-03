@@ -1,0 +1,3 @@
+pytest
+pyYaml>=3.0
+coloredlogs>=1

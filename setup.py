@@ -4,11 +4,8 @@
 import os
 from setuptools import setup
 
-PACKAGE_PATH=os.path.dirname(os.path.realpath(__file__))
-VERSION=open(os.path.join(PACKAGE_PATH, 'VERSION')).read().strip()
-
 setup(name = 'jmflashcards',
-      version = VERSION,
+      version = '0.0.2',
       description = 'A flashcard manager',
       author = 'Jorge Monforte González',
       author_email = 'jorge.monforte@gmail.com',
@@ -17,6 +14,7 @@ setup(name = 'jmflashcards',
       package_dir = {'' : 'lib'},
       license = 'private',
       keywords = 'flashcards latex',
+      install_requires=['colouredlogs', 'pyYaml'],
       classifiers = [
           'Environment :: Console',
           'Development Status :: 2 - Pre-Alpha',
@@ -26,7 +24,8 @@ setup(name = 'jmflashcards',
           'License :: Other/Proprietary License',
           'Natural Language :: English',
           'Operating System :: POSIX',
-          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
           'Topic :: Education :: Computer Aided Instruction (CAI)',
           'Topic :: Text Processing'
           ]
