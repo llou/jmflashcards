@@ -4,6 +4,7 @@ import asyncio
 from unittest import TestCase, IsolatedAsyncioTestCase
 from tempfile import mkdtemp
 from shutil import rmtree
+import configparser
 from unittest.mock import Mock, patch, mock_open, call, AsyncMock
 from jmflashcards.commands import load_config
 from jmflashcards.runner import run_command
@@ -11,6 +12,8 @@ from jmflashcards.latex import render_latex_to_file
 from jmflashcards.parser import FlashCard, Entry, Side, MathSide, ImageSide, \
         TextSide
 from jmflashcards.fcdeluxe import FCDFlashCard
+from jmflashcards.commands import INPUT_DIR, OUTPUT_DIR, \
+        QUESTION_KEYS, ANSWER_KEYS
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FLASHCARD_DIR = "flashcards"
@@ -25,48 +28,41 @@ def test_run_command():
 
 # TODO Configure the load config procedure
 CONFIG_FILE_WORKING ="""
-input_dir: /dev/null
-output_dir: /dev/urandom
-question_keys: 
-    - one
-    - two
-answer_keys:
-    - three
-    - four
+[jmflashcards]
+input_dir = /dev/null
+output_dir = /dev/urandom
+question_keys = one
+                two
+answer_keys = three
+              four
 """
 
 class ConfigurationTestCase(TestCase):
     def test_defaultconfig(self):
-        from jmflashcards.commands import INPUT_DIR, OUTPUT_DIR, \
-                QUESTION_KEYS, ANSWER_KEYS
-        with patch('jmflashcards.commands.open',
-                mock_open(read_data="")): 
-            result = load_config()
-            self.assertIn("input_dir", result)
-            self.assertEqual(result['input_dir'], INPUT_DIR)
-            self.assertIn("output_dir", result)
-            self.assertEqual(result['output_dir'], OUTPUT_DIR)
-            self.assertIn("question_keys", result)
-            for key in QUESTION_KEYS:
-               self.assertIn(key, result['question_keys'])
-            self.assertIn("answer_keys", result)
-            for key in ANSWER_KEYS:
-               self.assertIn(key, result['answer_keys'])
+        config = load_config()
+        self.assertIn("input_dir", config)
+        self.assertEqual(config['input_dir'], INPUT_DIR)
+        self.assertIn("output_dir", config)
+        self.assertEqual(config['output_dir'], OUTPUT_DIR)
+        self.assertIn("question_keys", config)
+        for key in QUESTION_KEYS:
+           self.assertIn(key, config['question_keys'])
+        self.assertIn("answer_keys", config)
+        for key in ANSWER_KEYS:
+           self.assertIn(key, config['answer_keys'])
 
     def test_custom_config(self):
-        with patch('jmflashcards.commands.open', 
-                mock_open(read_data=CONFIG_FILE_WORKING)): 
-            result = load_config()
-            self.assertIn("input_dir", result)
-            self.assertEqual(result['input_dir'], "/dev/null")
-            self.assertIn("output_dir", result)
-            self.assertEqual(result['output_dir'], "/dev/urandom")
-            self.assertIn("question_keys", result)
-            for key in ('one', 'two'):
-               self.assertIn(key, result['question_keys'])
-            self.assertIn("answer_keys", result)
-            for key in ('three', 'four'):
-               self.assertIn(key, result['answer_keys'])
+        config = load_config(CONFIG_FILE_WORKING)
+        self.assertIn("input_dir", config)
+        self.assertEqual(config['input_dir'], "/dev/null")
+        self.assertIn("output_dir", config)
+        self.assertEqual(config['output_dir'], "/dev/urandom")
+        self.assertIn("question_keys", config)
+        for key in ('one', 'two'):
+           self.assertIn(key, config['question_keys'])
+        self.assertIn("answer_keys", config)
+        for key in ('three', 'four'):
+           self.assertIn(key, config['answer_keys'])
 
 
 class FlashCardTestCase(TestCase):

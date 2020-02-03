@@ -1,13 +1,13 @@
 import os
 from argparse import ArgumentParser
 import coloredlogs
-import yaml
+import configparser
 
 USAGE = "%prog [options] <flashcard dir>"
 LOGGING_FORMAT = "[%(levelname)s] %(message)s"
 INPUT_DIR = "~/Dropbox/flashcards"
 OUTPUT_DIR = "~/Dropbox"
-CONFIG_FILE_PATH = '~/.config/jmflashcards/config.yaml'
+CONFIG_FILE_PATH = '~/.config/jmflashcards/config.ini'
 QUESTION_KEYS = ("question","pregunta")
 ANSWER_KEYS = ("answer","respuesta")
 
@@ -25,28 +25,19 @@ def init_logging(verbosity):
     coloredlogs.install(fmt=LOGGING_FORMAT, 
             level=get_logging_level(verbosity))
 
-def load_config():
-    try:
-        with open(CONFIG_FILE_PATH, 'r') as f:
-            txt = f.read()
-            try:
-                data = yaml.load(txt, Loader=yaml.Loader)
-            except yaml.yamlError as exc:
-                if hasattr(exc, 'problem_mark'):
-                    mark = exc.problem_mark
-                    print("Config error in position (%s:%s)" % (mark.line+1,
-                            mark.column+1))
-                else:
-                    print("Config error")
-                exit(1)
-            data = {} if data is None else data
-    except:
-        data = {}
+def load_config(config_string=None):
+    config = configparser.ConfigParser()
+    if config is None:
+        confif.read(CONFIG_FILE_PATH)
+    else:
+        config.read_string(config_string)
+    sections = config.sections()
+    settings = {} if not 'jmflashcards' in sections else config["jmflashcards"]
     result = {}
-    result['input_dir'] = data.get('input_dir', INPUT_DIR)
-    result['output_dir'] = data.get('output_dir', OUTPUT_DIR)
-    result['question_keys'] = data.get('question_keys', QUESTION_KEYS)
-    result['answer_keys'] = data.get('answer_keys', ANSWER_KEYS)
+    result['input_dir'] = settings.get('input_dir', INPUT_DIR)
+    result['output_dir'] = settings.get('output_dir', OUTPUT_DIR)
+    result['question_keys'] = settings.get('question_keys', QUESTION_KEYS)
+    result['answer_keys'] = settings.get('answer_keys', ANSWER_KEYS)
     return result
 
 def get_argument_parser(config):
