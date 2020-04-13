@@ -7,6 +7,8 @@ from jmflashcards.errors import JMFCError, JMFCParsingEntriesError, \
         JMFCEntryError
 from jmflashcards.util import walkdirs
 
+logger = logging.getLogger(__name__)
+
 MATH_SECTION_SYMBOL = "$"
 IMAGE_SECTION_SYMBOL = "~"
 ESCAPE_SYMBOL = "\\"
@@ -28,7 +30,7 @@ class FlashCard(object):
         self.parsed = False
 
     def parse(self):
-        logging.info("Parsing flashcard: %s" % self.reference)
+        logger.info("Parsing flashcard: %s" % self.reference)
         try:
             with codecs.open(self.definition_path, "r", "utf-8") as f:
                 self.raw_entries = yaml.load(f, Loader=yaml.Loader)
@@ -67,7 +69,7 @@ class Entry(object):
     side_class = None
     
     def __init__(self, flashcard, raw_entry, index):
-        logging.debug("Parsing entry: %s" % index)
+        logger.debug("Parsing entry: %s" % index)
         self.index = index
         self.flashcard = flashcard
         self.reference = flashcard.reference
@@ -89,12 +91,12 @@ class Entry(object):
             if isinstance(raw_side, bool):
                 raw_side = self.boolean_yes if raw_side else self.boolean_no
             elif raw_side is None:
-                logging.warning("Empty side in flashcard '%s' entry %d" % (self.reference, self.index))
+                logger.warning("Empty side in flashcard '%s' entry %d" % (self.reference, self.index))
                 raw_side = " "
             else:
                 raise JMFCEntryError(self, "Invalid raw side '%s'" % str(raw_side))
         if "\n" in raw_side: 
-            logging.debug("New line character in entry, replacing it with space")
+            logger.debug("New line character in entry, replacing it with space")
             raw_side = raw_side.replace("\n", " ")
         return raw_side
 
@@ -126,13 +128,13 @@ class Side(object):
     def build_from_raw(cls, entry, name, raw_text):
         for st in cls.side_types:
             if st.check_raw_text(raw_text):
-                logging.debug("Setting '%s' as side class '%s'" % (raw_text, st.__name__))
+                logger.debug("Setting '%s' as side class '%s'" % (raw_text, st.__name__))
                 return st(entry, name, raw_text)
         else:
             raise JMFCEntryError(entry, "Unable to assign side type to '%s'" % raw_text)
 
     def __init__(self, entry, name, raw_text):
-        logging.debug("Parsing %s text: '%s'" % (name, raw_text))
+        logger.debug("Parsing %s text: '%s'" % (name, raw_text))
         self.entry = entry
         self.flashcard = entry.flashcard
         self.name = name
@@ -184,7 +186,7 @@ class Repository(object):
     flashcard_file_name = FLASHCARD_FILE_NAME
 
     def __init__(self, directory, syncronizer):
-        logging.debug("Initializing flashcard repository on: %s" % directory)
+        logger.debug("Initializing flashcard repository on: %s" % directory)
         self.directory = directory
         self.syncronizer = syncronizer
 

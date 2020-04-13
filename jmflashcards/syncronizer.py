@@ -4,6 +4,9 @@ from jmflashcards.errors import JMFCError
 from jmflashcards.parser import Repository 
 from jmflashcards.fcdeluxe import FCDRepository 
 
+logger = logging.getLogger(__name__)
+
+
 class Syncronizer(object):
     fcd_repository_class = FCDRepository
     repository_class = Repository
@@ -20,16 +23,16 @@ class Syncronizer(object):
 
     def get_flashcards_status(self):
         fcd_references = set(self.fcd_repository.references())
-        logging.debug("fcd_references: %s" % ", ".join(fcd_references))
+        logger.debug("fcd_references: %s" % ", ".join(fcd_references))
         references = set(self.repository.references())
-        logging.debug("orig_references: %s" % ", ".join(references))
+        logger.debug("orig_references: %s" % ", ".join(references))
         to_delete = fcd_references.difference(references)
-        logging.debug("delete_references: %s" % ", ".join(to_delete))
+        logger.debug("delete_references: %s" % ", ".join(to_delete))
         new = references.difference(fcd_references)
-        logging.debug("new_references: %s" % ", ".join(new))
+        logger.debug("new_references: %s" % ", ".join(new))
         common = fcd_references.intersection(references)
         updated = [ x for x in self._iter_updated(common) ]
-        logging.debug("Sync running to update:%s    to create:%s    to delete:%s" % ("\n".join(updated), "\n".join(new), "\n".join(to_delete)))
+        logger.debug("Sync running to update:%s    to create:%s    to delete:%s" % ("\n".join(updated), "\n".join(new), "\n".join(to_delete)))
         return updated, list(new), list(to_delete)
 
     def _iter_updated(self, common):
@@ -64,7 +67,7 @@ class Syncronizer(object):
         await asyncio.gather(*tasks)
 
     async def render_flashcard(self, ref):
-        logging.info("Building flashcard '%s'" % ref)
+        logger.info("Building flashcard '%s'" % ref)
         if self.empty:
             return
         flashcard = self.repository[ref]
@@ -72,10 +75,10 @@ class Syncronizer(object):
             flashcard.parse()
             await self.fcd_repository.renderer.render(flashcard)
         except JMFCError as e:
-            logging.error(str(e))
+            logger.error(str(e))
 
     async def delete_flashcard(self, ref):
-        logging.info("Removing flashcard '%s'" % ref)
+        logger.info("Removing flashcard '%s'" % ref)
         if not self.empty:
             fcd_flashcard = self.fcd_repository[ref]
             fcd_flashcard.delete()

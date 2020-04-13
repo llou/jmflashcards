@@ -1,4 +1,5 @@
 import os
+import logging.config
 from argparse import ArgumentParser
 import coloredlogs
 import configparser
@@ -11,24 +12,66 @@ CONFIG_FILE_PATH = '~/.config/jmflashcards/config.ini'
 QUESTION_KEYS = ("question","pregunta")
 ANSWER_KEYS = ("answer","respuesta")
 
+logger = logging.getLogger(__name__)
+
 def get_logging_level(verbosity):
     if verbosity == 1:
-        return 'WARNING'
+        return 30
     elif verbosity == 2:
-        return 'INFO'
+        return 20
     elif verbosity >= 3:
-        return 'DEBUG'
+        return 10
     else:
-        return 'ERROR'
+        return 40
+
 
 def init_logging(verbosity):
-    coloredlogs.install(fmt=LOGGING_FORMAT, 
-            level=get_logging_level(verbosity))
+    level = get_logging_level(verbosity),
+    config = {
+        'version': 1,
+        'formatters': {
+            'f1': {
+                'class': 'coloredlogs.ColoredFormatter',
+                'format': LOGGING_FORMAT
+            }
+        },
+        'handlers': {
+            'h1': {
+                'class': 'logging.StreamHandler',
+                'level': level,
+                'formatter': 'f1',
+            }
+        },
+        'loggers': {
+            'jmflashcards.fcdeluxe': {
+                'handlers': ['h1'],
+            },
+            'jmflashcards.latex': {
+                'handlers': ['h1'],
+            },
+            'jmflashcards.parser': {
+                'handlers': ['h1'],
+            },
+            'jmflashcards.syncronizer': {
+                'handlers': ['h1'],
+            },
+            'jmflashcards.commands': {
+                'handlers': ['h1'],
+            },
+        },
+        'root': {
+            'level': level,
+            'handlers': ['h1']
+        }
+    }
+    logging.config.dictConfig(config)
+
+
 
 def load_config(config_string=None):
     config = configparser.ConfigParser()
     if config is None:
-        confif.read(CONFIG_FILE_PATH)
+        config.read(CONFIG_FILE_PATH)
     else:
         config.read_string(config_string)
     sections = config.sections()
@@ -70,6 +113,7 @@ def initialize():
 def run_syncronize():
     from jmflashcards.syncronizer import Syncronizer
     args = initialize()
+    logger.info('Start sync')
     output_dir = os.path.expanduser(args.output_dir)
     directory = os.path.expanduser(args.input_dir)
     question_keys = args.question_keys
@@ -77,3 +121,4 @@ def run_syncronize():
     syncronizer = Syncronizer(output_dir, directory, question_keys, 
             answer_keys, empty=args.empty)
     syncronizer.sync()
+    logger.info('End sync')

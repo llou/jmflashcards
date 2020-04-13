@@ -15,6 +15,8 @@ from jmflashcards.util import mkdir_p, walkdirs
 FCDELUXE_HEADER = "Text 1\tText 2\tPicture 1\tPicture 2\tSound 1\tSound 2\n"
 FCDELUXE_DIR_NAME = "Flashcards Deluxe"
 
+logger = logging.getLogger(__name__)
+
 class FCDFlashCard(object):
     header = FCDELUXE_HEADER
     file_extension = ".txt"
@@ -48,21 +50,21 @@ class FCDFlashCardRenderer(object):
 
     async def render(self, flashcard):
         reference = flashcard.reference
-        logging.info("Begin rendering flashcard deluxe: %s" % reference)
+        logger.info("Begin rendering flashcard deluxe: %s" % reference)
         fcd_flashcard = FCDFlashCard(reference, self.repository)
         path = fcd_flashcard.path
         media_path = fcd_flashcard.media_path
         flashcard_dir = os.path.dirname(path)
 
         # Create directories
-        logging.debug("Creating flashcard subdirectory '%s'" % path)
+        logger.debug("Creating flashcard subdirectory '%s'" % path)
         try:
             mkdir_p(flashcard_dir)
         except:
             msg = "Error creating flashcard directory: '%s'\n%s" % (flashcard_dir, format_exc())
             raise JMFCError(msg)
         if not os.path.exists(media_path):
-            logging.debug("Creating flashcard deluxe media directory: %s" % media_path)
+            logger.debug("Creating flashcard deluxe media directory: %s" % media_path)
             try:
                 os.mkdir(media_path)
             except:
@@ -74,7 +76,7 @@ class FCDFlashCardRenderer(object):
 
         # Render entries
 
-        logging.debug("Creating flashcard deluxe file: %s" % path)
+        logger.debug("Creating flashcard deluxe file: %s" % path)
         lines = []
         for entry in flashcard.entries:
             lines.append(await self.render_entry(entry, media_path))
@@ -85,7 +87,7 @@ class FCDFlashCardRenderer(object):
         return fcd_flashcard
 
     async def render_entry(self, entry, media_path):
-        logging.debug("Building entry: %d" % entry.index)
+        logger.debug("Building entry: %d" % entry.index)
         sqrenderer = self.get_side_renderer(entry.question, media_path)
         await sqrenderer.render()
         rq = sqrenderer.get_text_tuple()
@@ -100,7 +102,7 @@ class FCDFlashCardRenderer(object):
 
         for sc, rc in self.renderer_assignement:
             if issubclass(side.__class__, sc):
-                logging.debug("Selecting '%s'" % rc.__name__) 
+                logger.debug("Selecting '%s'" % rc.__name__) 
                 return rc(side, media_path)
 
 class SideRenderer(object):

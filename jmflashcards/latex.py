@@ -5,6 +5,8 @@ import logging
 from jmflashcards.runner import run_command
 from jmflashcards.util import get_random_name
 
+logger = logging.getLogger(__name__)
+
 LATEX_EXTENSION = ".tex"
 DVI_EXTENSION = ".dvi"
 PNG_EXTENSION = ".png"
@@ -27,7 +29,7 @@ $%s$
 '''
 
 async def render_latex_to_file(expression, output_file_path):
-    logging.info("Rendering latex expression: '%s'" % expression)
+    logger.info("Rendering latex expression: '%s'" % expression)
     name = get_random_name()
 
     #TeX template render
