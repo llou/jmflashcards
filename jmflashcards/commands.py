@@ -26,7 +26,7 @@ def get_logging_level(verbosity):
 
 
 def init_logging(verbosity):
-    level = get_logging_level(verbosity),
+    level = get_logging_level(verbosity)
     config = {
         'version': 1,
         'formatters': {
@@ -38,7 +38,6 @@ def init_logging(verbosity):
         'handlers': {
             'h1': {
                 'class': 'logging.StreamHandler',
-                'level': level,
                 'formatter': 'f1',
             }
         },
@@ -61,7 +60,7 @@ def init_logging(verbosity):
         },
         'root': {
             'level': level,
-            'handlers': ['h1']
+        #    'handlers': ['h1']
         }
     }
     logging.config.dictConfig(config)
