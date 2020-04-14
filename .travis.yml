@@ -3,7 +3,7 @@ python:
   - "3.8"
 before_install:
   - sudo apt-get update
-  - pip install -rtest/requirements
+  - pip install -rtest/requirements.txt
 script:
   - python test/test.py
 
