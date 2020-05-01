@@ -1,5 +1,8 @@
 import os
 import sys
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(CURRENT_DIR)
+sys.path.insert(0, PROJECT_DIR)
 import asyncio
 from unittest import TestCase, IsolatedAsyncioTestCase
 from tempfile import mkdtemp
@@ -15,7 +18,7 @@ from jmflashcards.fcdeluxe import FCDFlashCard
 from jmflashcards.commands import INPUT_DIR, OUTPUT_DIR, \
         QUESTION_KEYS, ANSWER_KEYS
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 FLASHCARD_DIR = "flashcards"
 FLASHCARD_PATH = os.path.join(CURRENT_DIR, FLASHCARD_DIR)
 NUM_ENTRIES = 5
