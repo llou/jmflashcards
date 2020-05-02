@@ -2,7 +2,8 @@ language: python
 python: 
   - "3.8"
 before_install:
-  - sudo apt-get update
+  - sudo apt update
+  - sudo apt install texlive-base dvipng
   - pip install -rtest/requirements.txt
 script:
   - python test/test.py
