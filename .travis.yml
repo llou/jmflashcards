@@ -3,7 +3,7 @@ python:
   - "3.8"
 before_install:
   - sudo apt update
-  - sudo apt install texlive-base dvipng
+  - sudo apt install texlive-base dvipng texlive-latex-base
   - pip install -rtest/requirements.txt
 script:
   - python test/test.py
