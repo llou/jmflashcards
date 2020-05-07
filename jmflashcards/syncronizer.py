@@ -77,7 +77,7 @@ class Syncronizer(object):
         except JMFCError as e:
             logger.error(str(e))
 
-    async def delete_flashcard(self, ref):
+    def delete_flashcard(self, ref):
         logger.info("Removing flashcard '%s'" % ref)
         if not self.empty:
             fcd_flashcard = self.fcd_repository[ref]
