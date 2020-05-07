@@ -65,21 +65,26 @@ def init_logging(verbosity):
     }
     logging.config.dictConfig(config)
 
-
+def settings_list_getter(settings, key, default):
+    if not key in settings:
+        return default
+    return [x.strip() for x in settings[key].split('\n')]
 
 def load_config(config_string=None):
     config = configparser.ConfigParser()
-    if config is None:
-        config.read(CONFIG_FILE_PATH)
+    if config_string is None:
+        config.read(os.path.expanduser(CONFIG_FILE_PATH))
     else:
         config.read_string(config_string)
     sections = config.sections()
-    settings = {} if not 'jmflashcards' in sections else config["jmflashcards"]
+    settings = {} if 'jmflashcards' not in sections else config["jmflashcards"]
     result = {}
     result['input_dir'] = settings.get('input_dir', INPUT_DIR)
     result['output_dir'] = settings.get('output_dir', OUTPUT_DIR)
-    result['question_keys'] = settings.get('question_keys', QUESTION_KEYS)
-    result['answer_keys'] = settings.get('answer_keys', ANSWER_KEYS)
+    result['question_keys'] = settings_list_getter(settings, 'question_keys',
+                                                   QUESTION_KEYS)
+    result['answer_keys'] = settings_list_getter(settings, 'answer_keys',
+                                                 ANSWER_KEYS) 
     return result
 
 def get_argument_parser(config):

@@ -32,17 +32,19 @@ def test_run_command():
 # TODO Configure the load config procedure
 CONFIG_FILE_WORKING ="""
 [jmflashcards]
-input_dir = /dev/null
-output_dir = /dev/urandom
-question_keys = one
-                two
-answer_keys = three
-              four
+input_dir = /tmp/flashcards-in
+output_dir = /tmp/flashcars-out
+question_keys =
+        Q
+        q
+answer_keys =
+        A
+        a
 """
 
 class ConfigurationTestCase(TestCase):
     def test_defaultconfig(self):
-        config = load_config()
+        config = load_config("")
         self.assertIn("input_dir", config)
         self.assertEqual(config['input_dir'], INPUT_DIR)
         self.assertIn("output_dir", config)
@@ -57,14 +59,14 @@ class ConfigurationTestCase(TestCase):
     def test_custom_config(self):
         config = load_config(CONFIG_FILE_WORKING)
         self.assertIn("input_dir", config)
-        self.assertEqual(config['input_dir'], "/dev/null")
+        self.assertEqual(config['input_dir'], "/tmp/flashcards-in")
         self.assertIn("output_dir", config)
-        self.assertEqual(config['output_dir'], "/dev/urandom")
+        self.assertEqual(config['output_dir'], "/tmp/flashcars-out")
         self.assertIn("question_keys", config)
-        for key in ('one', 'two'):
+        for key in ('Q', 'q'):
            self.assertIn(key, config['question_keys'])
         self.assertIn("answer_keys", config)
-        for key in ('three', 'four'):
+        for key in ('A', 'a'):
            self.assertIn(key, config['answer_keys'])
 
 
