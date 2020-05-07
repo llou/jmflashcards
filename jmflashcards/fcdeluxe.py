@@ -92,8 +92,8 @@ class FCDFlashCardRenderer(object):
         await sqrenderer.render()
         rq = sqrenderer.get_text_tuple()
         sarenderer = self.get_side_renderer(entry.answer, media_path)
-        await sqrenderer.render()
-        ra = sqrenderer.get_text_tuple()
+        await sarenderer.render()
+        ra = sarenderer.get_text_tuple()
         res = reduce(lambda x,y: x + list(y), zip(rq, ra), [])
         return "\t".join(res) + "\n"
 
