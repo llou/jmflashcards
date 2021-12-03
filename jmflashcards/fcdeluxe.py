@@ -13,7 +13,7 @@ from jmflashcards.latex import render_latex_to_file
 from jmflashcards.util import mkdir_p, walkdirs
 
 FCDELUXE_HEADER = "Text 1\tText 2\tPicture 1\tPicture 2\tSound 1\tSound 2\n"
-FCDELUXE_DIR_NAME = os.path.join("Apps","Flashcards Deluxe")
+FCDELUXE_DIR_NAME = os.path.join("Aplicaciones","Flashcards Deluxe")
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class FCDFlashCardRenderer(object):
         if not os.path.exists(media_path):
             logger.debug("Creating flashcard deluxe media directory: %s" % media_path)
             try:
-                os.mkdir(media_path)
+                os.makedirs(media_path)
             except:
                 msg = "Error creating flashcard media directory: '%s'" % media_path
                 raise JMFCError(msg)
@@ -185,7 +185,7 @@ class FCDRepository(object):
             raise JMFCError("Output path is not a directory")
         if not os.path.exists(self.directory):
             try:
-                os.mkdir(self.directory)
+                os.makedirs(self.directory)
             except OSError:
                 raise JMFCError("Unable to create Flash Cards Deluxe directory")
         if not os.path.isdir(self.directory):
