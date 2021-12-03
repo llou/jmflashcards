@@ -13,7 +13,7 @@ from jmflashcards.latex import render_latex_to_file
 from jmflashcards.util import mkdir_p, walkdirs
 
 FCDELUXE_HEADER = "Text 1\tText 2\tPicture 1\tPicture 2\tSound 1\tSound 2\n"
-FCDELUXE_DIR_NAME = "Flashcards Deluxe"
+FCDELUXE_DIR_NAME = os.path.join("Apps","Flashcards Deluxe")
 
 logger = logging.getLogger(__name__)
 
